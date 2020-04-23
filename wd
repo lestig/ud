@@ -1,0 +1,108 @@
+#!/bin/bash
+# 4/15/2020 – v1.0 Creating script to quickly mount drives Initializing
+# To optimize later with   lsblk -o NAME,MODEL,VENDOR /dev/sdm -n
+# ----- lsblk -o NAME,MODEL,VENDOR -n -d (-d provides no depth, so clean VENDOR and MODEL)
+# ----- if [ -z $(lsblk -o MOUNTPOINT -n) ]; then echo "NULL"; else echo $(lsblk -o MOUNTPOINT -n); fi
+# VENDOR is Key: ATA = Internal HDDs in system   WD = Western Digital external
+# KNAME logical address (e.g. /dev/sdn)
+# MODEL specific name for the drive
+
+#Good links:
+#https://stackoverflow.com/questions/45240943/round-number-to-10-in-bash
+
+
+# exit when any command fails
+set -e
+
+# variables
+DD[8]="1_eWD8" DD[4]="2_eWD4" DD[2]="3_eWD2" DD[5]="5_eBacula"
+SCFER=$1  #Captures argument e.g. -ca, -es, etc....
+
+# Function the reads type of WD HDD External drive connected.  2, 4 or # 8TB
+cual()
+{
+  WD="$(lsblk /dev/sdm1 -o SIZE -n)"
+  WDn=$((${WD%%.*}+1)) # removes anything after the first digit.  (3.7 -> 3)  Then add 1, that should do it
+  VENDOR=${VENDOR%% *}
+  echo "... Mounting ${VENDOR} ${WDn}TB: /dev/sdm1 -> /media/${DD[${WDn}]}"
+
+  # Mounting eWD HDDs - Main Backup External Discs
+  lecommand="$(sudo mount -t ntfs /dev/sdm1 /media/${DD[${WDn}]})"
+  echo "Command: $lecommand"
+}
+
+bacula()
+{
+      echo "... Mounting Bacula|ReaR /dev/sdn1 to "${DD[5]}
+      sudo mount -t vfat /dev/sdn1 /media/${DD[5]}/
+}
+
+seguridad() #Ensures mounting is not done at ZFS Pool or device with an already set mounting point
+{
+  echo " "
+  echo " "
+  echo "Starting configuration checks..."
+  if [ ${VENDOR} != "ATA" ]
+  then
+    echo "... Valid logical path" #Not pointing to Internal SATA devices
+    if [ "${MONTY}" = "" ]
+    then
+    echo "... Valid Mountpoint" #It is not in use by other devices
+    else
+      lsblk
+      echo " "
+      echo "********* IMPORTANT ***************"
+      echo "Mounting point [${MONTY}] is already assigned, aborting command..."
+      exit 1
+    fi
+  else
+    lsblk
+    echo " "
+    echo "********* IMPORTANT ***************"
+    echo "logical device [${VENDOR} - ${MODELO}] is an Internal SATA HDD, aborting command..."
+    exit 1
+  fi
+}
+
+case $SCFER in
+  # Copy Arguments
+  -e)
+    # Run security checks -- Quick to avoid overwriting mounting points or attempting to mount to an internal HDD
+    # Captures sdm type of disk and if mountpoint exists:
+    VENDOR="$(lsblk /dev/sdm -o VENDOR -n)"
+    MONTY="$(lsblk /dev/sdm1 -o MOUNTPOINT -n)"
+    MODELO="$(lsblk /dev/sdm -o MODEL -n)"
+    seguridad
+      # Making sure command is passed else an error and instructions
+      # displayed
+    [ -z $SCFER ] && { echo ""}; exit 1; } || cual
+    ;;
+  -b)
+    # Run security checks -- Quick to avoid overwriting mounting points or attempting to mount to an internal HDD
+    VENDOR="$(lsblk /dev/sdn -o VENDOR -n)"
+    MONTY="$(lsblk /dev/sdn1 -o MOUNTPOINT -n)"
+    MODELO="$(lsblk /dev/sdn -o MODEL -n)"
+    seguridad
+      # Making sure command is passed else an error and instructions
+      # displayed
+    [ -z $SCFER ] && { echo ""}; exit 1; } || bacula
+    ;;
+  *)
+    echo "Hi NOT Fernando!"
+    echo " "
+    echo "<wd> Command : ver 2.3 : Path=($0)"
+    echo "Incorrect Syntax ($1) "
+    echo " "
+    echo " Usage: wd -[arg]"
+    echo " "
+    echo "Arguments [arg]:# "
+    echo " -e   : Mounts HDD WD External Drive"
+    echo " -b   : Mounts USB Flash Drive (Stick)"
+    echo " "
+    echo "Example: wd -e     (It mounts an HDD to eWDx)"
+    echo "                   The System confirms and overwrite if needed"
+    ;;
+esac
+echo " "
+echo "Completed succesfully, wd signing off... "
+echo " "
