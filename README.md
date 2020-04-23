@@ -1,5 +1,6 @@
 # wd
-What Disk (What USB Disk partitions are available and mount them to the system) - Ubuntu Server 18.04
+<b>*What Disk - Ubuntu Server 18.04*</b>
+*(What USB Disk partitions are available and mount them to the system)*
 
 Description:
 
@@ -31,4 +32,4 @@ Simple bash script to mount any and all available USB drive partitions by invoki
 	- wd -c [check:	check what USB drives are available in the system]
 
 -----
-I wrote this for ubuntu server 18.04.  It should work with similar distros.
+*Written and tested on ubuntu server 18.04, but it should work for similar debian distros.*
