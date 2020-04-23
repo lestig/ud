@@ -1,6 +1,6 @@
 # wd
 <b>*What Disk - Ubuntu Server 18.04*</b>
-*(What USB Disk partitions are available and mount them to the system)*
+*(Check USB Disk partitions available and mount them to the system)*
 
 Description:
 
