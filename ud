@@ -1,108 +1,195 @@
 #!/bin/bash
+#<ud>: It mounts external USB disks ONLY.   This to ensure no issues no issues with ZFS disc storage
 # 4/15/2020 – v1.0 Creating script to quickly mount drives Initializing
-# To optimize later with   lsblk -o NAME,MODEL,VENDOR /dev/sdm -n
-# ----- lsblk -o NAME,MODEL,VENDOR -n -d (-d provides no depth, so clean VENDOR and MODEL)
-# ----- if [ -z $(lsblk -o MOUNTPOINT -n) ]; then echo "NULL"; else echo $(lsblk -o MOUNTPOINT -n); fi
-# VENDOR is Key: ATA = Internal HDDs in system   WD = Western Digital external
-# KNAME logical address (e.g. /dev/sdn)
-# MODEL specific name for the drive
+# 4/16/2020 – v2.0 Automating everything... find drives, logic paths and mount as appropriate   
+# 4/22/2020 - v2.1 Finalized and commited log capabilties and conf file for flexibility | add feature set
+# 4/22/2020 - Keeping prompts, no plans to make daemon (not needed).  /etc/ud/ud.conf to change VERBOSE in syslog.
 
-#Good links:
-#https://stackoverflow.com/questions/45240943/round-number-to-10-in-bash
-
-
-# exit when any command fails
-set -e
-
-# variables
-DD[8]="1_eWD8" DD[4]="2_eWD4" DD[2]="3_eWD2" DD[5]="5_eBacula"
-SCFER=$1  #Captures argument e.g. -ca, -es, etc....
-
-# Function the reads type of WD HDD External drive connected.  2, 4 or # 8TB
-cual()
+main ()
 {
-  WD="$(lsblk /dev/sdm1 -o SIZE -n)"
-  WDn=$((${WD%%.*}+1)) # removes anything after the first digit.  (3.7 -> 3)  Then add 1, that should do it
-  VENDOR=${VENDOR%% *}
-  echo "... Mounting ${VENDOR} ${WDn}TB: /dev/sdm1 -> /media/${DD[${WDn}]}"
-
-  # Mounting eWD HDDs - Main Backup External Discs
-  lecommand="$(sudo mount -t ntfs /dev/sdm1 /media/${DD[${WDn}]})"
-  echo "Command: $lecommand"
-}
-
-bacula()
-{
-      echo "... Mounting Bacula|ReaR /dev/sdn1 to "${DD[5]}
-      sudo mount -t vfat /dev/sdn1 /media/${DD[5]}/
-}
-
-seguridad() #Ensures mounting is not done at ZFS Pool or device with an already set mounting point
-{
-  echo " "
-  echo " "
-  echo "Starting configuration checks..."
-  if [ ${VENDOR} != "ATA" ]
-  then
-    echo "... Valid logical path" #Not pointing to Internal SATA devices
-    if [ "${MONTY}" = "" ]
-    then
-    echo "... Valid Mountpoint" #It is not in use by other devices
-    else
-      lsblk
-      echo " "
-      echo "********* IMPORTANT ***************"
-      echo "Mounting point [${MONTY}] is already assigned, aborting command..."
-      exit 1
+  #Main program
+      set -e  # exit if a command fails
+      #exec > /dev/null 2>&1
+  
+  # Logueame
+      # Log a string via syslog.
+    log()
+    {
+    if [ $1 != debug ] || expr "$VERBOSE" : "[yY]" > /dev/null; then
+	    logger -p user.$1 -t "ud[$$]" -- "$2"
     fi
-  else
-    lsblk
-    echo " "
-    echo "********* IMPORTANT ***************"
-    echo "logical device [${VENDOR} - ${MODELO}] is an Internal SATA HDD, aborting command..."
-    exit 1
-  fi
+    }
+
+  # Defineme
+      # variables 
+      SCFER=$1  #Captures argument e.g. a (Add), -r (Remove), c (Check)
+      lecom="lsblk -o TRAN,TYPE,NAME,VENDOR,FSTYPE,LABEL,MOUNTPOINT,SIZE -n -P"
+      zUSB="usb"
+      
+      # Nomenclature: (_pt = pointer) (_a=array)
+      main_a=()     #Array: Output of lsblk columns.  Each line is stored as an element in the array 
+      sub_a=()      #Array: Parsed commands (columns) from each lsblk line
+      neud_pt_a=()  #Array: Pointers to UID disk and attributes.  Store main and sub arrays index if a new USB disk is detected.
+    
+  # Enumerate
+      # Each word in the line is an element in the array '"'
+      log debug "enumerating list of devices and mountpoints available in system"
+      IFS='"' read -r -d '' -a main_a < <( $lecom && printf '\0' )
+      # folders in path /media/*
+      mountpoints
+  
+  # Seleccioname
+      seleccioname
+
+printf "\n%s" "" "... Completed succesfully" ""
+echo " "
+log info "($1) completed succesfully"
+
 }
 
-case $SCFER in
-  # Copy Arguments
-  -e)
-    # Run security checks -- Quick to avoid overwriting mounting points or attempting to mount to an internal HDD
-    # Captures sdm type of disk and if mountpoint exists:
-    VENDOR="$(lsblk /dev/sdm -o VENDOR -n)"
-    MONTY="$(lsblk /dev/sdm1 -o MOUNTPOINT -n)"
-    MODELO="$(lsblk /dev/sdm -o MODEL -n)"
-    seguridad
-      # Making sure command is passed else an error and instructions
-      # displayed
-    [ -z $SCFER ] && { echo ""}; exit 1; } || cual
-    ;;
-  -b)
-    # Run security checks -- Quick to avoid overwriting mounting points or attempting to mount to an internal HDD
-    VENDOR="$(lsblk /dev/sdn -o VENDOR -n)"
-    MONTY="$(lsblk /dev/sdn1 -o MOUNTPOINT -n)"
-    MODELO="$(lsblk /dev/sdn -o MODEL -n)"
-    seguridad
-      # Making sure command is passed else an error and instructions
-      # displayed
-    [ -z $SCFER ] && { echo ""}; exit 1; } || bacula
-    ;;
-  *)
-    echo "Hi NOT Fernando!"
+
+hitme()
+{
+    for l in "${!main_a[@]}"; do
+    #Set variables and check if device is an USB Disk Drive
+    eUSB
+
+        # Check if NAME is a partition of lNAME (e.g sdm1, sdm2 -> sdm)
+        if [[ $NAME =~ $lNAME ]] && [[ ! -z $lNAME ]] && [[ $TYPE == "part" ]] && [[ ! $SIZE =~ "M" ]]; then
+
+            printf "\n %s" "" " ---- USB $lVENDOR Drive" " Partition detected: $NAME"
+            printf "\n %s" " Format: $FSTYPE" " Label: $LABEL" " #: $l"
+            log debug "found usb $lVENDOR drive with valid $NAME paritition"
+
+            # Create /media/$LABEL if it does not exist and *** mount disk ***
+            if [[ $SCFER =~ "a" ]]; then montame; fi
+            
+        else
+        # Size < 1GB Prompt message 
+            if [[ $NAME =~ $lNAME ]] && [[ ! -z $lNAME ]] && [[ $TYPE == "part" ]] && [[ $SIZE =~ "M" ]]; then
+                printf "\n %s" "" "  $NAME partition is under 1GB :: $SIZE"
+                log err "cannot mount $NAME partition.  Size $SIZE is under 1GB"
+            fi         
+        fi
+    done
+}
+
+
+seleccioname()
+{
+    case $SCFER in
+      a | -a) 
+          # Mount (Add) partitions
+          hitme
+        ;;
+
+      c | -c) 
+          # Mount (Add) partitions
+          printf "\n%s" "" " *** USB Disk Drives in System *** " 
+          hitme #A conditional will skip mount attempt
+        ;;
+
+      -r)
+          # Run security checks -- Quick to avoid overwriting mounting points or attempting to mount to an internal HDD
+          echo "Not active -- "
+        ;;   
+
+      *)
+          #Instructions
+          instrucciones
+        ;;
+    esac
+}
+
+
+eUSB()
+{
+    TRAN=${main_a[$l]}          #TRAN index (usb, sata, nvme)
+    TYPE=${main_a[(($l+2))]}    #TYPE index (disk, part)
+    NAME=${main_a[(($l+4))]}    #NAME index (/dev/name)
+    VENDOR=${main_a[(($l+6))]}  #VENDOR index (ATA, WD)
+    FSTYPE=${main_a[(($l+8))]}  #FSTYPE index (ntfs, zfs_member, ext4, etc.)
+    LABEL=${main_a[(($l+10))]}  #LABEL index 
+    MTYPE=${main_a[(($l+12))]}  #MOUNTTYPE index (/dev/<folder>)
+    SIZE=${main_a[(($l+14))]}   #SIZE index (xxM, xxG, xxT)
+
+    # Check if device is an USB Disk Drive 
+    if [[ $TRAN == $zUSB ]] && [[ $TYPE == *"disk"* ]]; then
+    #Assigns DISK name (e.g. sdm) & Device Manufacturer VENDOR
+    lNAME=$NAME
+    lVENDOR=${VENDOR%% *}
+    log debug "found $zUSB devices and enumerated lsblk columns succesfuly"
+    fi
+}
+
+montame()
+{
+  # Check if $LABEL is null; if so, then assign a name
+      if [[ -z $LABEL ]]; then 
+          printf "\n%s" "" "  $lVENDOR $NAME does not have a LABEL: Using USB$NAME "
+          LABEL=USB$NAME
+          log info "$lVENDOR: Partition $NAME does not have a label. Attempting to use USB$NAME"
+      fi 
+              
+  # Check if partition is already mounted
+      if [[ ! -z $MTYPE ]]; then 
+          #Partition is mounted ... do nothing
+          printf "\n %s " "" " $MTYPE is already mounted with /dev/$NAME :: Device [$lVENDOR] :: $FSTYPE" ""
+          log info "mountpoint $MTYPE is mounted already with /dev/$NAME :: Device [$lVENDOR] :: $FSTYPE"
+             
+      else
+          # Create folder /media/$LABEL if it does not exist
+          if [[ ! ${monty_a[@]} =~ $LABEL ]]; then
+          ( printf "\n%s" "" "  mkdir /media/$LABEL" "  ")
+          mkdir /media/$LABEL
+          log info "Creating /media/$LABEL mountpoint"          
+          fi
+    
+      # Mount partition
+          # Re-ensuring we are not touching ZFS drives
+          if [[ $FSTYPE == "zfs_member" ]]; then echo "ZFS Member, not mounting"; log err "ZFS Member, not mounting"; else
+          DEVNAME=/dev/$NAME 
+        
+          # Execute mount command
+          printf "\n %s" "  mount -t $FSTYPE $DEVNAME /media/$LABEL"; echo 
+          mount -t $FSTYPE $DEVNAME /media/$LABEL
+          log info "executing command: mount -t $FSTYPE $DEVNAME /media/$LABEL"
+          fi
+      fi
+}
+
+
+mountpoints()
+{
+    shopt -s extglob nullglob
+    basedir=/media
+    # Add folders to array
+    monty_a=( "$basedir"/*/ )
+    # Remove leading basedir:
+    monty_a=( "${monty_a[@]#"$basedir/"}" )
+    # Remove trailing backslash
+    monty_a=( "${monty_a[@]%/}" )
+    log debug "enumerated mountpoints succesfuly"
+}
+
+
+instrucciones()
+{
     echo " "
-    echo "<wd> Command : ver 2.3 : Path=($0)"
+    echo "<ud> Command : ver 2.1 : Path=($0)"
     echo "Incorrect Syntax ($1) "
     echo " "
-    echo " Usage: wd -[arg]"
+    echo " Usage: ud -[arg]"
     echo " "
     echo "Arguments [arg]:# "
-    echo " -e   : Mounts HDD WD External Drive"
-    echo " -b   : Mounts USB Flash Drive (Stick)"
+    echo " -a   : Mounts USB disk drives with valid partitions"
+    echo " -r   : unmount USB disk drives"
     echo " "
-    echo "Example: wd -e     (It mounts an HDD to eWDx)"
-    echo "                   The System confirms and overwrite if needed"
-    ;;
-esac
-echo " "
-echo "Completed succesfully, wd signing off... "
-echo " "
+    echo "(Example:)"
+    echo " ud -a: It mounts all unmounted USB disk drives"; echo
+    log err "incorrect syntax ($1).  Exiting."
+    exit 1
+}
+
+
+main "$@"; exit
