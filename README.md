@@ -5,10 +5,10 @@
 Description:
 
 <b>Why?</b>
-Found mounting USB disk drives too often on ubuntu servers is quite a tidious task ...
+Mounting USB disk drives often in linux, ubuntu servers in my case is quite a tidious task ...
 	
- - Needed a way to mount devices with a very simple command.
- - Only USB flash drives are mounted.  In my case, I have ZFS pools and other devices on the servers that do not want touched.
+ - Needed a quick and simple command to mount only USB storage devices.
+ - In my case, I have ZFS pools and other devices on the servers that do not want touched.
 	
 <b>What?</b>
 	
