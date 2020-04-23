@@ -1,5 +1,5 @@
 # wd
-What Disk (What USB Disk - Mounts USB disk drive Ubuntu Server
+What Disk (What USB Disk partitions are available and mount them to the system) - Ubuntu Server 18.04
 
 Description:
 
