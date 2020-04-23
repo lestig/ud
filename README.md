@@ -27,8 +27,8 @@ Simple bash script to mount any and all available USB drive partitions by invoki
 1. Label your USB disk partitions as you want to be mounted by the system.
 2. Install script at /usr/local/bin (for convinience)
 3. Run command:
-		wd -a [add: 	mount partitions of USB disks connected to the system]
-		wd -c [check:	check what USB drives are available in the system]
+	- wd -a [add: 	mount partitions of USB disks connected to the system]
+	- wd -c [check:	check what USB drives are available in the system]
 
 -----
 I wrote this for ubuntu server 18.04.  It should work with similar distros.
