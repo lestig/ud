@@ -7,8 +7,8 @@ Description:
 <b>Why?</b>
 Found mounting USB disk drives too often on ubuntu servers is quite a tidious task ...
 	
- - Needed a way to mount devices with a very simple command, sharing in case someone else has similar needs.
- - A set of conditions ensure only USB flash drives are mounted.  In my case, I have ZFS pools on the servers that do not want touched.
+ - Needed a way to mount devices with a very simple command.
+ - Only USB flash drives are mounted.  In my case, I have ZFS pools and other devices on the servers that do not want touched.
 	
 <b>What?</b>
 	
@@ -24,7 +24,7 @@ Simple bash script to mount any and all available USB drive partitions by invoki
  - <b>Logs:</b> Added logging and conf file as I was initially planning on having it run as a daemon with more functionality, but realized it was unnecessary.
 
 	
-<b>How do I use the script?</b>
+# How do I use the script?
 
 1. Label your USB disk partitions as you want to be mounted by the system.
 2. Install script at /usr/local/bin (for convinience)
