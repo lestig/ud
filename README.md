@@ -1,13 +1,14 @@
 # wd
 <b>*What Disk - Ubuntu Server 18.04*</b>
-*(Check USB Disk partitions available and mount them to the system)*
+*(Mount USB storage device available to the system)*
 
 Description:
 
 <b>Why?</b>
 Found mounting USB disk drives too often on ubuntu servers is quite a tidious task ...
 	
-Took the time to write this simple script that takes care of my needs, sharing in case someone else feels it can be of use.  There is a flag to ensure only USB flash drives are mounted; this as I have ZFS pools on the servers that do not want touched.
+ - Needed a way to mount devices with a very simple command, sharing in case someone else has similar needs.
+ - A set of conditions ensure only USB flash drives are mounted.  In my case, I have ZFS pools on the servers that do not want touched.
 	
 <b>What?</b>
 	
