@@ -1,9 +1,5 @@
 #!/bin/bash
 #<ud>: It mounts external USB disks ONLY.   This to ensure no issues no issues with ZFS disc storage
-# 4/15/2020 – v1.0 Creating script to quickly mount drives Initializing
-# 4/16/2020 – v2.0 Automating everything... find drives, logic paths and mount as appropriate   
-# 4/22/2020 - v2.1 Finalized and commited log capabilties and conf file for flexibility | add feature set
-# 4/22/2020 - Keeping prompts, no plans to make daemon (not needed).  /etc/ud/ud.conf to change VERBOSE in syslog.
 
 main ()
 {
