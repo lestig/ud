@@ -24,7 +24,7 @@ main ()
     
   # Enumerate
       # Each word in the line is an element in the array '"'
-      log debug "enumerating list of devices and mountpoints available in system"
+      log debug "Enumerating list of devices and mountpoints available in system"
       IFS='"' read -r -d '' -a main_a < <( $lecom && printf '\0' )
       # folders in path /media/*
       mntpoints
@@ -34,7 +34,7 @@ main ()
 
 printf "\n%s" "" "... Completed succesfully" ""
 echo " "
-log info "($1) completed succesfully"
+log info "($1) Completed succesfully"
 
 }
 
@@ -51,7 +51,7 @@ voy()
             printf "\n %s" "" " ---- USB $lVENDOR Drive" " Partition detected: $NAME"
             printf "\n %s" " Format: $FSTYPE" " Label: $LABEL" " #: $l" 
             [[ -z $MTYPE ]] && printf "\n%s" "  Parition is not mounted" || printf "\n%s" "  Mountpoint: $MTYPE "
-            log debug "found usb $lVENDOR drive with valid $NAME paritition"
+            log debug "Found usb $lVENDOR drive with valid $NAME paritition"
 
             # Create /media/$LABEL if it does not exist and *** mount disk ***
             if [[ $SCFER =~ "a" ]]; then sube; fi
@@ -60,7 +60,7 @@ voy()
         # Size < 1GB Prompt message 
             if [[ $NAME =~ $lNAME ]] && [[ ! -z $lNAME ]] && [[ $TYPE == "part" ]] && [[ $SIZE =~ "M" ]]; then
                 printf "\n %s" "" "  $NAME partition is under 1GB :: $SIZE"
-                log err "cannot mount $NAME partition.  Size $SIZE is under 1GB"
+                log err "Cannot mount $NAME partition.  Size $SIZE is under 1GB"
             fi         
         fi
     done
@@ -76,7 +76,7 @@ args()
         ;;
 
       c | -c) 
-          # Mount (Add) partitions
+          # Check partitions
           printf "\n%s" "" " *** USB Disk Drives in System *** " 
           voy #A conditional will skip mount attempts
         ;;
@@ -110,7 +110,7 @@ eUSB()
     #Assigns DISK name (e.g. sdm) & Device Manufacturer VENDOR
     lNAME=$NAME
     lVENDOR=${VENDOR%% *}
-    log debug "found $zUSB devices and enumerated lsblk columns succesfuly"
+    log debug "Found $zUSB devices and enumerated lsblk columns succesfuly"
     fi
 }
 
@@ -127,7 +127,7 @@ sube()
       if [[ ! -z $MTYPE ]]; then 
           #Partition is mounted ... do nothing
           printf "\n %s " "" " $MTYPE is already mounted with /dev/$NAME :: Device [$lVENDOR] :: $FSTYPE" ""
-          log info "mountpoint $MTYPE is mounted already with /dev/$NAME :: Device [$lVENDOR] :: $FSTYPE"
+          log info "Mountpoint $MTYPE is mounted already with /dev/$NAME :: Device [$lVENDOR] :: $FSTYPE"
              
       else
           # Create folder /media/$LABEL if it does not exist
@@ -145,7 +145,7 @@ sube()
           # Execute mount command
           printf "\n %s" "  mount -t $FSTYPE $DEVNAME /media/$LABEL"; echo 
           mount -t $FSTYPE $DEVNAME /media/$LABEL
-          log info "executing command: mount -t $FSTYPE $DEVNAME /media/$LABEL"
+          log info "Executing command: mount -t $FSTYPE $DEVNAME /media/$LABEL"
           fi
       fi
 }
@@ -161,7 +161,7 @@ mntpoints()
     monty_a=( "${monty_a[@]#"$basedir/"}" )
     # Remove trailing backslash
     monty_a=( "${monty_a[@]%/}" )
-    log debug "enumerated mountpoints succesfuly"
+    log debug "Enumerated mountpoints succesfuly"
 }
 
 
