@@ -1,6 +1,6 @@
 # ud
 <b>*USB Drive - Ubuntu Server 18.04*</b>
-*(Mount USB storage device available to the system)*
+*(Mount USB storage devices available to the system)*
 
 Description:
 
