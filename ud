@@ -32,9 +32,9 @@ main ()
   # Argument Selection
       args
 
-printf "\n%s" "" "... Completed succesfully" ""
+printf "\n%s" "" "... Completed successfully" ""
 echo " "
-log info "($1) Completed succesfully"
+log info "($1) Completed successfully"
 
 }
 
@@ -110,7 +110,7 @@ eUSB()
     #Assigns DISK name (e.g. sdm) & Device Manufacturer VENDOR
     lNAME=$NAME
     lVENDOR=${VENDOR%% *}
-    log debug "Found $zUSB devices and enumerated lsblk columns succesfuly"
+    log debug "Found $zUSB devices and enumerated lsblk columns successfully"
     fi
 }
 
@@ -161,7 +161,7 @@ mntpoints()
     monty_a=( "${monty_a[@]#"$basedir/"}" )
     # Remove trailing backslash
     monty_a=( "${monty_a[@]%/}" )
-    log debug "Enumerated mountpoints succesfuly"
+    log debug "Enumerated mountpoints successfully"
 }
 
 
