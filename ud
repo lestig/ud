@@ -78,7 +78,7 @@ args()
       c | -c) 
           # Mount (Add) partitions
           printf "\n%s" "" " *** USB Disk Drives in System *** " 
-          voy #A conditional will skip mount attempt
+          voy #A conditional will skip mount attempts
         ;;
 
       -r)
