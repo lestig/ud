@@ -21,7 +21,6 @@ main ()
       # Nomenclature: (_pt = pointer) (_a=array)
       main_a=()     #Array: Output of lsblk columns.  Each line is stored as an element in the array 
       sub_a=()      #Array: Parsed commands (columns) from each lsblk line
-      neud_pt_a=()  #Array: Pointers to UID disk and attributes.  Store main and sub arrays index if a new USB disk is detected.
     
   # Enumerate
       # Each word in the line is an element in the array '"'
