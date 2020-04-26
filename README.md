@@ -39,4 +39,4 @@ Simple bash script to mount any and all available USB drive partitions by invoki
 	- wd -c [check:	check what USB drives are available in the system]
 
 -----
-*Written and tested on Ubuntu Server 18.04; it should work for similar Debian distros. *
+*Only tested on Ubuntu Server 18.04*
