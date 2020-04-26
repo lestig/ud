@@ -14,17 +14,17 @@ Mounting USB disk drives often in Linux; Ubuntu servers in my case, it is quite 
 	
 Simple bash script to mount any and all available USB drive partitions by invoking a simple command <wd>.
   
- - Program enumerates available USB disk partitions and mountpoints.
+ - The program enumerates available USB disk partitions and mountpoints.
       - The program will look for and mount ONLY USB storage devices.
       - It can easily be expanded to mount other disk types (not tested).
  - <b>Mountpoint:</b> 
-     - <ud> will use the LABEL of the partition if it exists.
+     - <i>ud</i> will use the LABEL of the partition if it exists.
      	- Mountpoin is set to /media/$LABEL.  (It can be set to any other folder if needed).
      	- A folder named $LABEL (disk's label) is created if it does not exist.
      - If the partition does not have a label, the program will attempt to use USB$NAME (USB + Partition logical block name)
      	- e.g. /media/USBsdb1
  - <b>Filesystem:</b> 
- 	- <ud> will mount the drive using the given filesystem of the partition.
+ 	- <i>ud</i> will mount the drive using the given filesystem of the partition.
 	
  - <b>Logs:</b> Added logging and conf file as I was initially planning on having it run as a daemon with more functionality, but realized it was unnecessary.
 
