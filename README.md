@@ -18,13 +18,14 @@ Simple bash script to mount any and all available USB drive partitions by invoki
       - The program will look for and mount ONLY USB storage devices.
       - It can easily be expanded to mount other disk types (not tested).
  - <b>Mountpoint:</b> 
-     - <i>ud</i> will use the LABEL of the partition if it exists.
+     - The LABEL of the partition is used; if it exists.
      	- Mountpoin is set to /media/$LABEL.  (It can be set to any other folder if needed).
      	- A folder named $LABEL (disk's label) is created if it does not exist.
      - If the partition does not have a label, the program will attempt to use USB$NAME (USB + Partition logical block name)
      	- e.g. /media/USBsdb1
  - <b>Filesystem:</b> 
- 	- <i>ud</i> will mount the drive using the given filesystem of the partition.
+     - It's chosen by looking at the filesystem of the partition itself.
+     	- e.g. ntfs, ext4, etc.
 	
  - <b>Logs:</b> Added logging and conf file as I was initially planning on having it run as a daemon with more functionality, but realized it was unnecessary.
 
