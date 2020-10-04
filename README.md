@@ -5,7 +5,7 @@
 Description:
 
 <b>Why?</b>
-Mounting USB disk drives in Linux is a common task; Ubuntu servers in my case, it is quite a tedious task ...
+Mounting USB disk drives in Linux is a common task.  In my case, Ubuntu servers; found it is quite a tedious task...
 	
  - Needed a quick and simple command to mount only USB storage devices.
  - Ensure critical storage (e.g. ZFS pools) and other devices on the servers were not touched.
